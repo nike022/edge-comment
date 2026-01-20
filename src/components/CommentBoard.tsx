@@ -226,7 +226,7 @@ export const CommentBoard: FC = () => {
       <CommentInput onSubmitComment={handleSubmitComment} isLoading={isLoading} />
 
       <div className="border-b border-chat-border/20 bg-chat-bg">
-        <div className="max-w-3xl mx-auto px-4 py-2 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex gap-2">
             <button
               type="button"
@@ -257,7 +257,7 @@ export const CommentBoard: FC = () => {
             </button>
           </div>
           {!isLoadingStats && stats && (
-            <div className="flex items-center gap-6 text-xs text-chat-text-secondary">
+            <div className="flex items-center gap-4 text-xs text-chat-text-secondary">
               <span>评论 <span className="font-semibold text-chat-text">{stats.totalComments}</span></span>
               <span>点赞 <span className="font-semibold text-chat-text">{stats.totalLikes}</span></span>
               {stats.mostLikedComment && (
