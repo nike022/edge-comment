@@ -29,6 +29,11 @@ export const CommentMessage: FC<CommentMessageProps> = ({ comment, isAdmin, onDe
             <span className="text-chat-text-secondary text-xs" title={new Date(comment.timestamp).toLocaleString('zh-CN')}>
               {formatRelativeTime(new Date(comment.timestamp))}
             </span>
+            {isAdmin && comment.ip && (
+              <span className="text-chat-text-secondary text-xs" title="IP地址(仅管理员可见)">
+                IP: {comment.ip}
+              </span>
+            )}
           </div>
           <div className="text-chat-text leading-relaxed">
             {comment.content.split('\n').map((line, index) => (
