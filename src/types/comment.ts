@@ -5,6 +5,7 @@ export interface Comment {
   email?: string;
   timestamp: Date;
   ip?: string;
+  likes?: number;
 }
 
 export interface CommentState {

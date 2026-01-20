@@ -13,6 +13,7 @@ export const CommentBoard: FC = () => {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,6 +29,12 @@ export const CommentBoard: FC = () => {
     const token = localStorage.getItem('auth_token');
     if (token) {
       setIsAuthenticated(true);
+    }
+
+    // 加载已点赞的评论
+    const liked = localStorage.getItem('liked_comments');
+    if (liked) {
+      setLikedComments(new Set(JSON.parse(liked)));
     }
   }, []);
 
@@ -141,6 +148,32 @@ export const CommentBoard: FC = () => {
     }
   };
 
+  const handleLike = async (id: string) => {
+    if (likedComments.has(id)) return;
+
+    try {
+      const response = await fetch('/api/like-comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentId: id })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        const newLikedComments = new Set(likedComments);
+        newLikedComments.add(id);
+        setLikedComments(newLikedComments);
+        localStorage.setItem('liked_comments', JSON.stringify([...newLikedComments]));
+
+        setComments(comments.map(c =>
+          c.id === id ? { ...c, likes: (c.likes || 0) + 1 } : c
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to like comment:', error);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-chat-bg">
       {showToast && <Toast message="留言提交成功！" onClose={() => setShowToast(false)} />}
@@ -191,6 +224,8 @@ export const CommentBoard: FC = () => {
                 comment={comment}
                 isAdmin={isAuthenticated}
                 onDelete={handleDelete}
+                onLike={handleLike}
+                hasLiked={likedComments.has(comment.id)}
               />
             ))
           )}
