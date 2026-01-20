@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, FC, useMemo } from 'react';
+import { useState, useEffect, FC, useMemo } from 'react';
 import { CommentMessage } from './CommentMessage';
 import { CommentInput } from './CommentInput';
 import { CommentSkeleton } from './CommentSkeleton';
@@ -17,15 +17,6 @@ export const CommentBoard: FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [sortType, setSortType] = useState<SortType>('newest');
-  const commentsEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [comments]);
 
   useEffect(() => {
     fetchComments();
@@ -278,7 +269,6 @@ export const CommentBoard: FC = () => {
               />
             ))
           )}
-          <div ref={commentsEndRef} />
         </div>
       </div>
     </div>
