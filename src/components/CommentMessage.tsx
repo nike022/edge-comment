@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { User, Trash2 } from 'lucide-react';
 import { Comment } from '../types/comment';
 import { formatRelativeTime } from '../utils/formatTime';
+import { sanitizeContent } from '../utils/sanitize';
 
 interface CommentMessageProps {
   comment: Comment;
@@ -26,9 +27,7 @@ export const CommentMessage: FC<CommentMessageProps> = ({ comment, isAdmin, onDe
           </div>
           <div className="text-chat-text leading-relaxed">
             {comment.content.split('\n').map((line, index) => (
-              <p key={index} className="mb-2 last:mb-0">
-                {line || '\u00A0'}
-              </p>
+              <p key={index} className="mb-2 last:mb-0" dangerouslySetInnerHTML={{ __html: sanitizeContent(line) || '\u00A0' }} />
             ))}
           </div>
         </div>

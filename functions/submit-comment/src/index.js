@@ -28,8 +28,59 @@ export default {
         });
       }
 
+      // 内容长度验证
+      if (content.length > 500) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: '评论内容不能超过500字'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
+      // 敏感词过滤
+      const sensitiveWords = ['垃圾', '傻逼', '操', '妈的', '草泥马'];
+      const containsSensitive = sensitiveWords.some(word =>
+        content.toLowerCase().includes(word.toLowerCase())
+      );
+
+      if (containsSensitive) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: '评论内容包含敏感词，请修改后重试'
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
       const edgeKv = new EdgeKV({ namespace: 'edge-comment' });
-      const commentId = `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+
+      // 后端频率限制检查
+      const rateLimitKey = `rate_limit_${clientIp}`;
+      try {
+        const lastSubmitData = await edgeKv.get(rateLimitKey, { type: 'text' });
+        if (lastSubmitData) {
+          const lastSubmitTime = parseInt(lastSubmitData);
+          const timeDiff = Date.now() - lastSubmitTime;
+          if (timeDiff < 60000) {
+            const waitSeconds = Math.ceil((60000 - timeDiff) / 1000);
+            return new Response(JSON.stringify({
+              success: false,
+              error: `请等待 ${waitSeconds} 秒后再提交`
+            }), {
+              status: 429,
+              headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            });
+          }
+        }
+      } catch (e) {
+        console.log('Rate limit check failed:', e);
+      }
+
+      const commentId = `comment_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
       const comment = {
         id: commentId,
@@ -37,10 +88,17 @@ export default {
         email: email || '',
         content,
         timestamp: new Date().toISOString(),
-        ip: request.headers.get('x-forwarded-for') || 'unknown'
+        ip: clientIp
       };
 
       await edgeKv.put(commentId, JSON.stringify(comment));
+
+      // 记录提交时间用于频率限制
+      try {
+        await edgeKv.put(rateLimitKey, Date.now().toString(), { expirationTtl: 60 });
+      } catch (e) {
+        console.log('Failed to set rate limit:', e);
+      }
 
       const maxRetries = 3;
       for (let attempt = 0; attempt < maxRetries; attempt++) {

@@ -47,6 +47,17 @@ export const CommentBoard: FC = () => {
   };
 
   const handleSubmitComment = async (author: string, email: string, content: string) => {
+    // 前端频率限制检查
+    const lastSubmitTime = localStorage.getItem('last_submit_time');
+    if (lastSubmitTime) {
+      const timeDiff = Date.now() - parseInt(lastSubmitTime);
+      const waitSeconds = Math.ceil((60000 - timeDiff) / 1000);
+      if (timeDiff < 60000) {
+        alert(`请等待 ${waitSeconds} 秒后再提交`);
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/submit-comment', {
@@ -57,6 +68,9 @@ export const CommentBoard: FC = () => {
 
       const result = await response.json();
       if (result.success) {
+        // 记录提交时间
+        localStorage.setItem('last_submit_time', Date.now().toString());
+
         // 立即添加新评论到本地状态，提供即时反馈
         const newComment: Comment = {
           id: result.commentId,
@@ -68,6 +82,8 @@ export const CommentBoard: FC = () => {
         };
         setComments([newComment, ...comments]);
         setShowToast(true);
+      } else if (result.error) {
+        alert(result.error);
       }
     } catch (error) {
       console.error('Failed to submit comment:', error);
