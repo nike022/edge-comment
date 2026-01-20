@@ -57,7 +57,16 @@ export const CommentBoard: FC = () => {
 
       const result = await response.json();
       if (result.success) {
-        await fetchComments();
+        // 立即添加新评论到本地状态，提供即时反馈
+        const newComment: Comment = {
+          id: result.commentId,
+          author,
+          email: email || '',
+          content,
+          timestamp: new Date(),
+          ip: ''
+        };
+        setComments([newComment, ...comments]);
         setShowToast(true);
       }
     } catch (error) {
