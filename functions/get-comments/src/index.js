@@ -28,11 +28,6 @@ export default {
         commentIds = JSON.parse(listData);
       }
 
-      // Sort commentIds based on sort parameter
-      if (sort === 'oldest') {
-        commentIds = commentIds.reverse();
-      }
-
       // First, get all valid comments to calculate accurate totals
       const allComments = [];
       for (const commentId of commentIds) {
@@ -47,8 +42,10 @@ export default {
         }
       }
 
-      // Sort by likes if requested (before pagination)
-      if (sort === 'mostLiked') {
+      // Sort comments based on sort parameter
+      if (sort === 'oldest') {
+        allComments.reverse();
+      } else if (sort === 'mostLiked') {
         allComments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
       }
 
