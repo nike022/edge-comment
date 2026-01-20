@@ -85,7 +85,7 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
               </div>
             </div>
             {showEmojiPicker && (
-              <div className="absolute bottom-full mb-2 right-0 bg-chat-input border border-chat-border/20 rounded-lg p-2 shadow-lg z-10">
+              <div className="absolute top-full mt-2 right-0 bg-chat-input border border-chat-border/20 rounded-lg p-2 shadow-lg z-10">
                 <div className="grid grid-cols-5 gap-1">
                   {emojis.map((emoji, index) => (
                     <button
