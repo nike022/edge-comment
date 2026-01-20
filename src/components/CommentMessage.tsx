@@ -1,8 +1,9 @@
 import { FC } from 'react';
-import { User, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Comment } from '../types/comment';
 import { formatRelativeTime } from '../utils/formatTime';
 import { sanitizeContent } from '../utils/sanitize';
+import { getGravatarUrl } from '../utils/gravatar';
 
 interface CommentMessageProps {
   comment: Comment;
@@ -14,9 +15,11 @@ export const CommentMessage: FC<CommentMessageProps> = ({ comment, isAdmin, onDe
   return (
     <div className="group w-full border-b border-chat-border/10 hover:bg-chat-hover/50 transition-colors">
       <div className="flex gap-4 p-4 mx-auto max-w-3xl">
-        <div className="flex-shrink-0 w-8 h-8 rounded-sm flex items-center justify-center text-white bg-chat-green">
-          <User size={16} />
-        </div>
+        <img
+          src={getGravatarUrl(comment.email || '', 32)}
+          alt={comment.author}
+          className="flex-shrink-0 w-8 h-8 rounded-full"
+        />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
