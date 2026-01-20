@@ -154,6 +154,8 @@ export const CommentBoard: FC = () => {
         {authError && <div className="max-w-3xl mx-auto px-4 pb-2 text-red-400 text-sm">{authError}</div>}
       </div>
 
+      <CommentInput onSubmitComment={handleSubmitComment} isLoading={isLoading} />
+
       <div className="flex-1 overflow-y-auto chat-scrollbar">
         <div className="pb-4">
           {isFetchingComments ? (
@@ -179,8 +181,6 @@ export const CommentBoard: FC = () => {
           <div ref={commentsEndRef} />
         </div>
       </div>
-
-      <CommentInput onSubmitComment={handleSubmitComment} isLoading={isLoading} />
     </div>
   );
 };
