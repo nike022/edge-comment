@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { User, Trash2 } from 'lucide-react';
 import { Comment } from '../types/comment';
+import { formatRelativeTime } from '../utils/formatTime';
 
 interface CommentMessageProps {
   comment: Comment;
@@ -19,8 +20,8 @@ export const CommentMessage: FC<CommentMessageProps> = ({ comment, isAdmin, onDe
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-chat-text font-medium">{comment.author}</span>
-            <span className="text-chat-text-secondary text-xs">
-              {new Date(comment.timestamp).toLocaleString('zh-CN')}
+            <span className="text-chat-text-secondary text-xs" title={new Date(comment.timestamp).toLocaleString('zh-CN')}>
+              {formatRelativeTime(new Date(comment.timestamp))}
             </span>
           </div>
           <div className="text-chat-text leading-relaxed">

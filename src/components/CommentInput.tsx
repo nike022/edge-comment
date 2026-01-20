@@ -10,6 +10,7 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
   const [author, setAuthor] = useState('');
   const [email, setEmail] = useState('');
   const [content, setContent] = useState('');
+  const MAX_LENGTH = 500;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +21,15 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
     setEmail('');
     setContent('');
   };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    if (newContent.length <= MAX_LENGTH) {
+      setContent(newContent);
+    }
+  };
+
+  const remainingChars = MAX_LENGTH - content.length;
 
   return (
     <div className="border-t border-chat-border/20 bg-chat-bg">
@@ -42,14 +52,19 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
           />
         </div>
         <div className="flex gap-2">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="写下你的留言..."
-            required
-            rows={3}
-            className="flex-1 px-3 py-2 bg-chat-input text-chat-text rounded border border-chat-border/20 focus:outline-none focus:border-purple-500 resize-none text-sm sm:text-base"
-          />
+          <div className="flex-1 relative">
+            <textarea
+              value={content}
+              onChange={handleContentChange}
+              placeholder="写下你的留言..."
+              required
+              rows={3}
+              className="w-full px-3 py-2 bg-chat-input text-chat-text rounded border border-chat-border/20 focus:outline-none focus:border-purple-500 resize-none text-sm sm:text-base"
+            />
+            <div className={`absolute bottom-2 right-2 text-xs ${remainingChars < 50 ? 'text-red-400' : 'text-chat-text-secondary'}`}>
+              {remainingChars}/{MAX_LENGTH}
+            </div>
+          </div>
           <button
             type="submit"
             disabled={isLoading || !author.trim() || !content.trim()}
