@@ -17,8 +17,6 @@ export const CommentBoard: FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [sortType, setSortType] = useState<SortType>('newest');
-  const [currentPage, setCurrentPage] = useState(1);
-  const commentsPerPage = 10;
 
   useEffect(() => {
     fetchComments();
@@ -184,16 +182,6 @@ export const CommentBoard: FC = () => {
     }
   }, [comments, sortType]);
 
-  const totalPages = Math.ceil(sortedComments.length / commentsPerPage);
-  const paginatedComments = useMemo(() => {
-    const startIndex = (currentPage - 1) * commentsPerPage;
-    return sortedComments.slice(startIndex, startIndex + commentsPerPage);
-  }, [sortedComments, currentPage, commentsPerPage]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortType]);
-
   return (
     <div className="min-h-screen bg-chat-bg">
       {showToast && <Toast message="留言提交成功！" onClose={() => setShowToast(false)} />}
@@ -269,41 +257,16 @@ export const CommentBoard: FC = () => {
             暂无留言，快来抢沙发吧~
           </div>
         ) : (
-          <>
-            {paginatedComments.map((comment) => (
-              <CommentMessage
-                key={comment.id}
-                comment={comment}
-                isAdmin={isAuthenticated}
-                onDelete={handleDelete}
-                onLike={handleLike}
-                hasLiked={likedComments.has(comment.id)}
-              />
-            ))}
-            {totalPages > 1 && (
-              <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 text-sm rounded border border-chat-border/20 text-chat-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-chat-hover transition-colors"
-                >
-                  上一页
-                </button>
-                <span className="text-sm text-chat-text-secondary">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 text-sm rounded border border-chat-border/20 text-chat-text disabled:opacity-50 disabled:cursor-not-allowed hover:bg-chat-hover transition-colors"
-                >
-                  下一页
-                </button>
-              </div>
-            )}
-          </>
+          sortedComments.map((comment) => (
+            <CommentMessage
+              key={comment.id}
+              comment={comment}
+              isAdmin={isAuthenticated}
+              onDelete={handleDelete}
+              onLike={handleLike}
+              hasLiked={likedComments.has(comment.id)}
+            />
+          ))
         )}
       </div>
     </div>
