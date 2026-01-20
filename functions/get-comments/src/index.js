@@ -33,32 +33,33 @@ export default {
         commentIds = commentIds.reverse();
       }
 
-      const totalComments = commentIds.length;
+      // First, get all valid comments to calculate accurate totals
+      const allComments = [];
+      for (const commentId of commentIds) {
+        try {
+          const commentData = await edgeKv.get(commentId, { type: 'text' });
+          if (commentData) {
+            const comment = JSON.parse(commentData);
+            allComments.push(comment);
+          }
+        } catch (parseError) {
+          console.error(`Failed to parse comment ${commentId}:`, parseError.message);
+        }
+      }
+
+      // Sort by likes if requested (before pagination)
+      if (sort === 'mostLiked') {
+        allComments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      }
+
+      // Calculate accurate totals based on existing comments
+      const totalComments = allComments.length;
       const totalPages = Math.ceil(totalComments / pageSize);
       const startIndex = (page - 1) * pageSize;
       const endIndex = Math.min(startIndex + pageSize, totalComments);
 
-      const comments = [];
-      for (let i = startIndex; i < endIndex; i++) {
-        let commentData;
-        try {
-          commentData = await edgeKv.get(commentIds[i], { type: 'text' });
-          if (commentData) {
-            const comment = JSON.parse(commentData);
-            comments.push(comment);
-          } else {
-            console.error(`Comment ${commentIds[i]} returned empty data`);
-          }
-        } catch (parseError) {
-          console.error(`Failed to parse comment ${commentIds[i]}:`, parseError.message, 'Raw data:', commentData?.substring(0, 100));
-          // 跳过无法解析的评论，继续处理其他评论
-        }
-      }
-
-      // Sort by likes if requested
-      if (sort === 'mostLiked') {
-        comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      }
+      // Get comments for current page
+      const comments = allComments.slice(startIndex, endIndex);
 
       return new Response(JSON.stringify({
         success: true,
