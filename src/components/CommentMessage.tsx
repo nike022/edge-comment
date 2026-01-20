@@ -10,7 +10,7 @@ interface CommentMessageProps {
 
 export const CommentMessage: FC<CommentMessageProps> = ({ comment, isAdmin, onDelete }) => {
   return (
-    <div className="group w-full border-b border-chat-border/10 bg-chat-hover">
+    <div className="group w-full border-b border-chat-border/10 hover:bg-chat-hover/50 transition-colors">
       <div className="flex gap-4 p-4 mx-auto max-w-3xl">
         <div className="flex-shrink-0 w-8 h-8 rounded-sm flex items-center justify-center text-white bg-chat-green">
           <User size={16} />
