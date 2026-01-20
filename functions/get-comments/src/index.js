@@ -17,6 +17,7 @@ export default {
     try {
       const url = new URL(request.url);
       const page = parseInt(url.searchParams.get('page') || '1');
+      const sort = url.searchParams.get('sort') || 'newest';
       const pageSize = 7; // EdgeKV operation limit: 1 for comments_list + 7 for individual comments = 8 total
 
       const edgeKv = new EdgeKV({ namespace: 'edge-comment' });
@@ -25,6 +26,11 @@ export default {
       const listData = await edgeKv.get('comments_list', { type: 'text' });
       if (listData) {
         commentIds = JSON.parse(listData);
+      }
+
+      // Sort commentIds based on sort parameter
+      if (sort === 'oldest') {
+        commentIds = commentIds.reverse();
       }
 
       const totalComments = commentIds.length;
@@ -47,6 +53,11 @@ export default {
           console.error(`Failed to parse comment ${commentIds[i]}:`, parseError.message, 'Raw data:', commentData?.substring(0, 100));
           // 跳过无法解析的评论，继续处理其他评论
         }
+      }
+
+      // Sort by likes if requested
+      if (sort === 'mostLiked') {
+        comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
       }
 
       return new Response(JSON.stringify({

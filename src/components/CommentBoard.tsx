@@ -59,7 +59,7 @@ export const CommentBoard: FC = () => {
   const fetchComments = async () => {
     setIsFetchingComments(true);
     try {
-      const response = await fetch(`/api/get-comments?page=${currentPage}`);
+      const response = await fetch(`/api/get-comments?page=${currentPage}&sort=${sortType}`);
       const result = await response.json();
       if (result.success) {
         setComments(result.comments);
@@ -224,8 +224,6 @@ export const CommentBoard: FC = () => {
         {authError && <div className="max-w-3xl mx-auto px-4 pb-2 text-red-400 text-sm">{authError}</div>}
       </div>
 
-      <StatsPanel stats={stats} isLoading={isLoadingStats} />
-
       <CommentInput onSubmitComment={handleSubmitComment} isLoading={isLoading} />
 
       <div className="border-b border-chat-border/20 bg-chat-bg">
@@ -259,6 +257,8 @@ export const CommentBoard: FC = () => {
           </button>
         </div>
       </div>
+
+      <StatsPanel stats={stats} isLoading={isLoadingStats} />
 
       <div className="pb-4">
         {isFetchingComments ? (
