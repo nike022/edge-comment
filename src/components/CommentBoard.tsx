@@ -183,7 +183,7 @@ export const CommentBoard: FC = () => {
   }, [comments, sortType]);
 
   return (
-    <div className="flex flex-col h-screen bg-chat-bg">
+    <div className="min-h-screen bg-chat-bg">
       {showToast && <Toast message="留言提交成功！" onClose={() => setShowToast(false)} />}
 
       <div className="border-b border-chat-border/20 bg-chat-bg">
@@ -245,31 +245,29 @@ export const CommentBoard: FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto chat-scrollbar">
-        <div className="pb-4">
-          {isFetchingComments ? (
-            <>
-              <CommentSkeleton />
-              <CommentSkeleton />
-              <CommentSkeleton />
-            </>
-          ) : comments.length === 0 ? (
-            <div className="flex items-center justify-center h-64 text-chat-text-secondary">
-              暂无留言，快来抢沙发吧~
-            </div>
-          ) : (
-            sortedComments.map((comment) => (
-              <CommentMessage
-                key={comment.id}
-                comment={comment}
-                isAdmin={isAuthenticated}
-                onDelete={handleDelete}
-                onLike={handleLike}
-                hasLiked={likedComments.has(comment.id)}
-              />
-            ))
-          )}
-        </div>
+      <div className="pb-4">
+        {isFetchingComments ? (
+          <>
+            <CommentSkeleton />
+            <CommentSkeleton />
+            <CommentSkeleton />
+          </>
+        ) : comments.length === 0 ? (
+          <div className="flex items-center justify-center h-64 text-chat-text-secondary">
+            暂无留言，快来抢沙发吧~
+          </div>
+        ) : (
+          sortedComments.map((comment) => (
+            <CommentMessage
+              key={comment.id}
+              comment={comment}
+              isAdmin={isAuthenticated}
+              onDelete={handleDelete}
+              onLike={handleLike}
+              hasLiked={likedComments.has(comment.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );
