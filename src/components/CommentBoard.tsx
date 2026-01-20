@@ -1,14 +1,18 @@
 import { useState, useRef, useEffect, FC } from 'react';
 import { CommentMessage } from './CommentMessage';
 import { CommentInput } from './CommentInput';
+import { CommentSkeleton } from './CommentSkeleton';
+import { Toast } from './Toast';
 import { Comment } from '../types/comment';
 
 export const CommentBoard: FC = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingComments, setIsFetchingComments] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+  const [showToast, setShowToast] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -28,6 +32,7 @@ export const CommentBoard: FC = () => {
   }, []);
 
   const fetchComments = async () => {
+    setIsFetchingComments(true);
     try {
       const response = await fetch('/api/get-comments');
       const result = await response.json();
@@ -36,6 +41,8 @@ export const CommentBoard: FC = () => {
       }
     } catch (error) {
       console.error('Failed to fetch comments:', error);
+    } finally {
+      setIsFetchingComments(false);
     }
   };
 
@@ -51,6 +58,7 @@ export const CommentBoard: FC = () => {
       const result = await response.json();
       if (result.success) {
         await fetchComments();
+        setShowToast(true);
       }
     } catch (error) {
       console.error('Failed to submit comment:', error);
@@ -110,6 +118,8 @@ export const CommentBoard: FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-chat-bg">
+      {showToast && <Toast message="留言提交成功！" onClose={() => setShowToast(false)} />}
+
       <div className="border-b border-chat-border/20 bg-chat-bg">
         <div className="max-w-3xl mx-auto p-4 flex justify-between items-center">
           <h1 className="text-lg font-semibold text-chat-text">边缘留言板</h1>
@@ -137,14 +147,26 @@ export const CommentBoard: FC = () => {
 
       <div className="flex-1 overflow-y-auto chat-scrollbar">
         <div className="pb-4">
-          {comments.map((comment) => (
-            <CommentMessage
-              key={comment.id}
-              comment={comment}
-              isAdmin={isAuthenticated}
-              onDelete={handleDelete}
-            />
-          ))}
+          {isFetchingComments ? (
+            <>
+              <CommentSkeleton />
+              <CommentSkeleton />
+              <CommentSkeleton />
+            </>
+          ) : comments.length === 0 ? (
+            <div className="flex items-center justify-center h-64 text-chat-text-secondary">
+              暂无留言，快来抢沙发吧~
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <CommentMessage
+                key={comment.id}
+                comment={comment}
+                isAdmin={isAuthenticated}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
           <div ref={commentsEndRef} />
         </div>
       </div>
