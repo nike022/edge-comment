@@ -10,7 +10,10 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
   const [author, setAuthor] = useState('');
   const [email, setEmail] = useState('');
   const [content, setContent] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const MAX_LENGTH = 500;
+
+  const emojis = ['😀', '😂', '😊', '😍', '🤔', '👍', '👎', '❤️', '🎉', '🔥', '💯', '✨', '🚀', '💪', '🙏'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +30,13 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
     if (newContent.length <= MAX_LENGTH) {
       setContent(newContent);
     }
+  };
+
+  const handleEmojiClick = (emoji: string) => {
+    if (content.length + emoji.length <= MAX_LENGTH) {
+      setContent(content + emoji);
+    }
+    setShowEmojiPicker(false);
   };
 
   const remainingChars = MAX_LENGTH - content.length;
@@ -61,9 +71,36 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
               rows={3}
               className="w-full px-3 py-2 bg-chat-input text-chat-text rounded border border-chat-border/20 focus:outline-none focus:border-purple-500 resize-none text-sm sm:text-base"
             />
-            <div className={`absolute bottom-2 right-2 text-xs ${remainingChars < 50 ? 'text-red-400' : 'text-chat-text-secondary'}`}>
-              {remainingChars}/{MAX_LENGTH}
+            <div className="absolute bottom-2 right-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className="text-chat-text-secondary hover:text-chat-text text-lg"
+                title="添加表情"
+              >
+                😊
+              </button>
+              <div className={`text-xs ${remainingChars < 50 ? 'text-red-400' : 'text-chat-text-secondary'}`}>
+                {remainingChars}/{MAX_LENGTH}
+              </div>
             </div>
+            {showEmojiPicker && (
+              <div className="absolute bottom-full mb-2 right-0 bg-chat-input border border-chat-border/20 rounded-lg p-2 shadow-lg z-10">
+                <div className="grid grid-cols-5 gap-1">
+                  {emojis.map((emoji, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleEmojiClick(emoji)}
+                      className="text-2xl hover:bg-chat-hover p-1 rounded transition-colors"
+                      title={emoji}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <button
             type="submit"
