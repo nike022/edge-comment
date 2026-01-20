@@ -26,9 +26,15 @@ export default {
       const comments = [];
       const limit = 50;
       for (let i = 0; i < Math.min(commentIds.length, limit); i++) {
-        const commentData = await edgeKv.get(commentIds[i], { type: 'text' });
-        if (commentData) {
-          comments.push(JSON.parse(commentData));
+        try {
+          const commentData = await edgeKv.get(commentIds[i], { type: 'text' });
+          if (commentData) {
+            const comment = JSON.parse(commentData);
+            comments.push(comment);
+          }
+        } catch (parseError) {
+          console.error(`Failed to parse comment ${commentIds[i]}:`, parseError.message);
+          // 跳过无法解析的评论，继续处理其他评论
         }
       }
 
@@ -41,6 +47,7 @@ export default {
       });
 
     } catch (error) {
+      console.error('Get comments error:', error.message, error.stack);
       return new Response(JSON.stringify({
         success: false,
         error: error.message
