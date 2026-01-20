@@ -3,6 +3,7 @@ import { CommentMessage } from './CommentMessage';
 import { CommentInput } from './CommentInput';
 import { CommentSkeleton } from './CommentSkeleton';
 import { Toast } from './Toast';
+import { StatsPanel } from './StatsPanel';
 import { Comment } from '../types/comment';
 
 type SortType = 'newest' | 'oldest' | 'mostLiked';
@@ -19,9 +20,12 @@ export const CommentBoard: FC = () => {
   const [sortType, setSortType] = useState<SortType>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [stats, setStats] = useState<any>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
     fetchComments();
+    fetchStats();
   }, [currentPage, sortType]);
 
   useEffect(() => {
@@ -36,6 +40,21 @@ export const CommentBoard: FC = () => {
       setLikedComments(new Set(JSON.parse(liked)));
     }
   }, []);
+
+  const fetchStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const response = await fetch('/api/get-stats');
+      const result = await response.json();
+      if (result.success) {
+        setStats(result.stats);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
 
   const fetchComments = async () => {
     setIsFetchingComments(true);
@@ -204,6 +223,8 @@ export const CommentBoard: FC = () => {
         </div>
         {authError && <div className="max-w-3xl mx-auto px-4 pb-2 text-red-400 text-sm">{authError}</div>}
       </div>
+
+      <StatsPanel stats={stats} isLoading={isLoadingStats} />
 
       <CommentInput onSubmitComment={handleSubmitComment} isLoading={isLoading} />
 
