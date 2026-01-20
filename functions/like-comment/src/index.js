@@ -41,7 +41,20 @@ export default {
         });
       }
 
-      const comment = JSON.parse(commentData);
+      let comment;
+      try {
+        comment = JSON.parse(commentData);
+      } catch (parseError) {
+        console.error(`Failed to parse comment ${commentId} for like:`, parseError.message);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Comment data is corrupted'
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
       comment.likes = (comment.likes || 0) + 1;
 
       await edgeKv.put(commentId, JSON.stringify(comment));

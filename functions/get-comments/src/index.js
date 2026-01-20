@@ -31,9 +31,11 @@ export default {
           if (commentData) {
             const comment = JSON.parse(commentData);
             comments.push(comment);
+          } else {
+            console.error(`Comment ${commentIds[i]} returned empty data`);
           }
         } catch (parseError) {
-          console.error(`Failed to parse comment ${commentIds[i]}:`, parseError.message);
+          console.error(`Failed to parse comment ${commentIds[i]}:`, parseError.message, 'Raw data:', commentData?.substring(0, 100));
           // 跳过无法解析的评论，继续处理其他评论
         }
       }
