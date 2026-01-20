@@ -1,13 +1,13 @@
 // 生成Gravatar头像URL
 export const getGravatarUrl = (email: string, size: number = 40): string => {
   if (!email) {
-    // 如果没有邮箱，返回默认头像
-    return `https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=${size}`;
+    // 如果没有邮箱，返回默认头像（使用identicon生成彩色几何图案）
+    return `https://www.gravatar.com/avatar/00000000000000000000000000000000?d=identicon&s=${size}`;
   }
 
   // 生成MD5哈希
   const hash = md5(email.trim().toLowerCase());
-  return `https://www.gravatar.com/avatar/${hash}?d=mp&s=${size}`;
+  return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=${size}`;
 };
 
 // MD5 implementation for browser
