@@ -56,7 +56,8 @@ export default {
       }
 
       const edgeKv = new EdgeKV({ namespace: 'edge-comment' });
-      const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+      const forwardedFor = request.headers.get('x-forwarded-for') || 'unknown';
+      const clientIp = forwardedFor.split(',')[0].trim();
 
       // 后端频率限制检查
       const rateLimitKey = `rate_limit_${clientIp}`;
