@@ -23,33 +23,37 @@ export default {
         commentIds = JSON.parse(listData);
       }
 
-      const totalComments = commentIds.length;
+      // Fetch all comments to calculate accurate stats
+      const allComments = [];
+      for (const commentId of commentIds) {
+        try {
+          const commentData = await edgeKv.get(commentId, { type: 'text' });
+          if (commentData) {
+            const comment = JSON.parse(commentData);
+            allComments.push(comment);
+          }
+        } catch (error) {
+          console.error(`Failed to process comment ${commentId}:`, error.message);
+        }
+      }
+
+      const totalComments = allComments.length;
       let totalLikes = 0;
       let mostLikedComment = null;
       let maxLikes = 0;
 
-      // Fetch up to 7 comments to calculate stats (EdgeKV limit)
-      const limit = Math.min(commentIds.length, 7);
-      for (let i = 0; i < limit; i++) {
-        try {
-          const commentData = await edgeKv.get(commentIds[i], { type: 'text' });
-          if (commentData) {
-            const comment = JSON.parse(commentData);
-            const likes = comment.likes || 0;
-            totalLikes += likes;
+      for (const comment of allComments) {
+        const likes = comment.likes || 0;
+        totalLikes += likes;
 
-            if (likes > maxLikes) {
-              maxLikes = likes;
-              mostLikedComment = {
-                id: comment.id,
-                author: comment.author,
-                content: comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : ''),
-                likes: likes
-              };
-            }
-          }
-        } catch (error) {
-          console.error(`Failed to process comment ${commentIds[i]}:`, error.message);
+        if (likes > maxLikes) {
+          maxLikes = likes;
+          mostLikedComment = {
+            id: comment.id,
+            author: comment.author,
+            content: comment.content.substring(0, 50) + (comment.content.length > 50 ? '...' : ''),
+            likes: likes
+          };
         }
       }
 
