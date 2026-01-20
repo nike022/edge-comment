@@ -1,4 +1,4 @@
-import { useState, useEffect, FC, useMemo } from 'react';
+import { useState, useEffect, FC } from 'react';
 import { CommentMessage } from './CommentMessage';
 import { CommentInput } from './CommentInput';
 import { CommentSkeleton } from './CommentSkeleton';
@@ -18,10 +18,14 @@ export const CommentBoard: FC = () => {
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [sortType, setSortType] = useState<SortType>('newest');
   const [currentPage, setCurrentPage] = useState(1);
-  const commentsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalComments, setTotalComments] = useState(0);
 
   useEffect(() => {
     fetchComments();
+  }, [currentPage, sortType]);
+
+  useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (token) {
       setIsAuthenticated(true);
@@ -37,10 +41,14 @@ export const CommentBoard: FC = () => {
   const fetchComments = async () => {
     setIsFetchingComments(true);
     try {
-      const response = await fetch('/api/get-comments');
+      const response = await fetch(`/api/get-comments?page=${currentPage}`);
       const result = await response.json();
       if (result.success) {
         setComments(result.comments);
+        if (result.pagination) {
+          setTotalPages(result.pagination.totalPages);
+          setTotalComments(result.pagination.totalComments);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch comments:', error);
@@ -170,30 +178,6 @@ export const CommentBoard: FC = () => {
     }
   };
 
-  const sortedComments = useMemo(() => {
-    const sorted = [...comments];
-    switch (sortType) {
-      case 'newest':
-        return sorted.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      case 'oldest':
-        return sorted.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      case 'mostLiked':
-        return sorted.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      default:
-        return sorted;
-    }
-  }, [comments, sortType]);
-
-  const totalPages = Math.ceil(sortedComments.length / commentsPerPage);
-  const paginatedComments = useMemo(() => {
-    const startIndex = (currentPage - 1) * commentsPerPage;
-    return sortedComments.slice(startIndex, startIndex + commentsPerPage);
-  }, [sortedComments, currentPage, commentsPerPage]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [sortType]);
-
   return (
     <div className="min-h-screen bg-chat-bg">
       {showToast && <Toast message="留言提交成功！" onClose={() => setShowToast(false)} />}
@@ -270,7 +254,7 @@ export const CommentBoard: FC = () => {
           </div>
         ) : (
           <>
-            {paginatedComments.map((comment: Comment) => (
+            {comments.map((comment: Comment) => (
               <CommentMessage
                 key={comment.id}
                 comment={comment}

@@ -15,6 +15,10 @@ export default {
     }
 
     try {
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const pageSize = 7; // EdgeKV operation limit: 1 for comments_list + 7 for individual comments = 8 total
+
       const edgeKv = new EdgeKV({ namespace: 'edge-comment' });
 
       let commentIds = [];
@@ -23,9 +27,13 @@ export default {
         commentIds = JSON.parse(listData);
       }
 
+      const totalComments = commentIds.length;
+      const totalPages = Math.ceil(totalComments / pageSize);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, totalComments);
+
       const comments = [];
-      const limit = 50;
-      for (let i = 0; i < Math.min(commentIds.length, limit); i++) {
+      for (let i = startIndex; i < endIndex; i++) {
         let commentData;
         try {
           commentData = await edgeKv.get(commentIds[i], { type: 'text' });
@@ -43,7 +51,13 @@ export default {
 
       return new Response(JSON.stringify({
         success: true,
-        comments
+        comments,
+        pagination: {
+          page,
+          pageSize,
+          totalComments,
+          totalPages
+        }
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
