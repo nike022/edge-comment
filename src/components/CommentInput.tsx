@@ -68,8 +68,8 @@ export const CommentInput: FC<CommentInputProps> = ({ onSubmitComment, isLoading
               onChange={handleContentChange}
               placeholder="写下你的留言..."
               required
-              rows={3}
-              className="w-full px-3 py-2 bg-chat-input text-chat-text rounded border border-chat-border/20 focus:outline-none focus:border-purple-500 resize-none text-sm sm:text-base"
+              rows={4}
+              className="w-full px-3 py-2 bg-chat-input text-chat-text rounded border border-chat-border/20 focus:outline-none focus:border-purple-500 resize-y text-sm sm:text-base"
             />
             <div className="absolute bottom-2 right-2 flex items-center gap-2">
               <button
