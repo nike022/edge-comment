@@ -19,7 +19,6 @@ export const CommentBoard: FC = () => {
   const [sortType, setSortType] = useState<SortType>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalComments, setTotalComments] = useState(0);
 
   useEffect(() => {
     fetchComments();
@@ -47,7 +46,6 @@ export const CommentBoard: FC = () => {
         setComments(result.comments);
         if (result.pagination) {
           setTotalPages(result.pagination.totalPages);
-          setTotalComments(result.pagination.totalComments);
         }
       }
     } catch (error) {
